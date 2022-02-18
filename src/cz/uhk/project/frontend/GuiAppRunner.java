@@ -1,5 +1,7 @@
 package cz.uhk.project.frontend;
 
+import cz.uhk.project.backend.Country;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -100,6 +102,8 @@ public class GuiAppRunner extends JFrame {
         
         addButtonListeners();
 
+        getRootPane().setDefaultButton(buttonConfirm);
+
     }
 
     private void addButtonListeners() {
@@ -114,4 +118,13 @@ public class GuiAppRunner extends JFrame {
         buttonClear.addActionListener(listener);
     }
 
+    public Country createNewCountry(){
+        fieldCountryName.setText("");
+        fieldCountryCapital.setText("");
+        fieldCountryInhabitants.setText("");
+        fieldCountryArea.setText("");
+        setVisible(true);
+// todo create new country
+//        https://www.youtube.com/watch?v=9qwmQ--pksM&t=980s
+    }
 }
