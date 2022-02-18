@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 
 public class GuiAppRunner extends JFrame {
+
     private final JPanel panelActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelFlow = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -17,7 +18,7 @@ public class GuiAppRunner extends JFrame {
     private final JButton buttonUpdate = new JButton("Aktualizovat záznam");
     private final JButton buttonDelete = new JButton("Odstranit záznam");
 
-    private final JButton buttonOk = new JButton("Ok");
+    private final JButton buttonConfirm = new JButton("Ok");
     private final JButton buttonClear = new JButton("Zrušit");
 
     private final JTextField fieldCountryName = new JTextField(15);
@@ -29,6 +30,8 @@ public class GuiAppRunner extends JFrame {
     private final JLabel labelCountryCapital = new JLabel("Hlavní město");
     private final JLabel labelCountryInhabitants = new JLabel("Počet obyvatel");
     private final JLabel labelCountryArea = new JLabel("Rozloha");
+
+    private boolean confirmed = false;
 
     public static void main(String[] args) {
         new GuiAppRunner().setVisible(true);
@@ -47,24 +50,8 @@ public class GuiAppRunner extends JFrame {
         setBackground(Color.LIGHT_GRAY);
 
         addToolButtons();
+        addFields();
         addFlowButtons();
-
-        labelCountryName.setLabelFor(fieldCountryName);
-        labelCountryCapital.setLabelFor(fieldCountryCapital);
-        labelCountryInhabitants.setLabelFor(fieldCountryInhabitants);
-        labelCountryArea.setLabelFor(fieldCountryArea);
-
-        labelCountryName.setDisplayedMnemonic('J');
-        labelCountryCapital.setDisplayedMnemonic('H');
-        labelCountryInhabitants.setDisplayedMnemonic('P');
-        labelCountryArea.setDisplayedMnemonic('R');
-
-        panelActions.setBorder(new EmptyBorder(10,0,40,0));
-        panelInputs.setBorder(new EmptyBorder(10,20,30,20));
-
-        add(panelActions, BorderLayout.NORTH);
-        add(panelInputs, BorderLayout.CENTER);
-        add(panelFlow, BorderLayout.SOUTH);
 
         pack();
     }
@@ -88,9 +75,43 @@ public class GuiAppRunner extends JFrame {
         panelInputs.add(fieldCountryArea);
     }
 
-    public void addFlowButtons(){
-        panelFlow.add(buttonOk);
+    private void addFields(){
+        labelCountryName.setLabelFor(fieldCountryName);
+        labelCountryCapital.setLabelFor(fieldCountryCapital);
+        labelCountryInhabitants.setLabelFor(fieldCountryInhabitants);
+        labelCountryArea.setLabelFor(fieldCountryArea);
+
+        labelCountryName.setDisplayedMnemonic('J');
+        labelCountryCapital.setDisplayedMnemonic('H');
+        labelCountryInhabitants.setDisplayedMnemonic('P');
+        labelCountryArea.setDisplayedMnemonic('R');
+
+        panelActions.setBorder(new EmptyBorder(10,0,40,0));
+        panelInputs.setBorder(new EmptyBorder(10,20,30,20));
+
+        add(panelActions, BorderLayout.NORTH);
+        add(panelInputs, BorderLayout.CENTER);
+        add(panelFlow, BorderLayout.SOUTH);
+    }
+
+    private void addFlowButtons(){
+        panelFlow.add(buttonConfirm);
         panelFlow.add(buttonClear);
+        
+        addButtonListeners();
 
     }
+
+    private void addButtonListeners() {
+        ActionListener listener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                confirmed = actionEvent.getSource() == buttonConfirm;
+                setVisible(false);
+            }
+        };
+        buttonConfirm.addActionListener(listener);
+        buttonClear.addActionListener(listener);
+    }
+
 }
