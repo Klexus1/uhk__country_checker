@@ -8,23 +8,27 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 
 public class GuiAppRunner extends JFrame {
-    JButton buttonList = new JButton("Zobrazit seznam");
-    JButton buttonCreate = new JButton("Přidat záznam");
-    JButton buttonUpdate = new JButton("Aktualizovat záznam");
-    JButton buttonDelete = new JButton("Odstranit záznam");
+    private final JPanel panelActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JPanel panelFlow = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-    JTextField fieldCountryName = new JTextField(15);
-    JTextField fieldCountryCapital = new JTextField(15);
-    JTextField fieldCountryInhabitants = new JTextField(15);
-    JTextField fieldCountryArea = new JTextField(15);
+    private final JButton buttonList = new JButton("Zobrazit seznam");
+    private final JButton buttonCreate = new JButton("Přidat záznam");
+    private final JButton buttonUpdate = new JButton("Aktualizovat záznam");
+    private final JButton buttonDelete = new JButton("Odstranit záznam");
 
-    JLabel labelCountryName = new JLabel("Název země");
-    JLabel labelCountryCapital = new JLabel("Hlavní město");
-    JLabel labelCountryInhabitants = new JLabel("Počet obyvatel");
-    JLabel labelCountryArea = new JLabel("Rozloha");
+    private final JButton buttonOk = new JButton("Ok");
+    private final JButton buttonClear = new JButton("Zrušit");
 
-    JPanel panelActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
-    JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JTextField fieldCountryName = new JTextField(15);
+    private final JTextField fieldCountryCapital = new JTextField(15);
+    private final JTextField fieldCountryInhabitants = new JTextField(15);
+    private final JTextField fieldCountryArea = new JTextField(15);
+
+    private final JLabel labelCountryName = new JLabel("Název země");
+    private final JLabel labelCountryCapital = new JLabel("Hlavní město");
+    private final JLabel labelCountryInhabitants = new JLabel("Počet obyvatel");
+    private final JLabel labelCountryArea = new JLabel("Rozloha");
 
     public static void main(String[] args) {
         new GuiAppRunner().setVisible(true);
@@ -35,11 +39,15 @@ public class GuiAppRunner extends JFrame {
      */
     public GuiAppRunner(){
         super("COUNTRY CHECKER");
+        init();
+    }
+
+    private void init() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(800, 500);
         setBackground(Color.LIGHT_GRAY);
 
-        addButtons();
+        addToolButtons();
+        addFlowButtons();
 
         labelCountryName.setLabelFor(fieldCountryName);
         labelCountryCapital.setLabelFor(fieldCountryCapital);
@@ -52,14 +60,16 @@ public class GuiAppRunner extends JFrame {
         labelCountryArea.setDisplayedMnemonic('R');
 
         panelActions.setBorder(new EmptyBorder(10,0,40,0));
-        panelInputs.setBorder(new EmptyBorder(10,20,20,20));
+        panelInputs.setBorder(new EmptyBorder(10,20,30,20));
+
         add(panelActions, BorderLayout.NORTH);
         add(panelInputs, BorderLayout.CENTER);
+        add(panelFlow, BorderLayout.SOUTH);
 
         pack();
     }
 
-    private void addButtons(){
+    private void addToolButtons(){
         panelActions.add(buttonList);
         panelActions.add(buttonCreate);
         panelActions.add(buttonUpdate);
@@ -76,6 +86,11 @@ public class GuiAppRunner extends JFrame {
 
         panelInputs.add(labelCountryArea);
         panelInputs.add(fieldCountryArea);
+    }
+
+    public void addFlowButtons(){
+        panelFlow.add(buttonOk);
+        panelFlow.add(buttonClear);
 
     }
 }
