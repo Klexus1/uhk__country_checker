@@ -8,18 +8,17 @@ public class Country {
     private long inhabitants;
     private double area;
 
-    public Country(String name){
+    public Country(String name) {
         this.name = name;
         this.id = getId();
     }
 
-    public static synchronized long getId()
-    {
+    public static synchronized long getId() {
         Country.idCounter += 1;
         return idCounter;
     }
 
-    public Country(String name, String capital, long inhabitants, double area){
+    public Country(String name, String capital, long inhabitants, double area) {
         this.name = name;
         this.capital = capital;
         this.inhabitants = inhabitants;

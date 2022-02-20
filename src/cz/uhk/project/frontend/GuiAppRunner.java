@@ -1,6 +1,7 @@
 package cz.uhk.project.frontend;
 
 import cz.uhk.project.backend.Country;
+import cz.uhk.project.backend.CountryManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -8,8 +9,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
+import java.util.Objects;
 
 public class GuiAppRunner extends JFrame {
+//        https://www.youtube.com/watch?v=9qwmQ--pksM&t=980s
 
     private final JPanel panelActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -42,7 +45,7 @@ public class GuiAppRunner extends JFrame {
     /**
      * Create app gui window
      */
-    public GuiAppRunner(){
+    public GuiAppRunner() {
         super("COUNTRY CHECKER");
         init();
     }
@@ -58,7 +61,7 @@ public class GuiAppRunner extends JFrame {
         pack();
     }
 
-    private void addToolButtons(){
+    private void addToolButtons() {
         panelActions.add(buttonList);
         panelActions.add(buttonCreate);
         panelActions.add(buttonUpdate);
@@ -77,7 +80,7 @@ public class GuiAppRunner extends JFrame {
         panelInputs.add(fieldCountryArea);
     }
 
-    private void addFields(){
+    private void addFields() {
         labelCountryName.setLabelFor(fieldCountryName);
         labelCountryCapital.setLabelFor(fieldCountryCapital);
         labelCountryInhabitants.setLabelFor(fieldCountryInhabitants);
@@ -88,18 +91,18 @@ public class GuiAppRunner extends JFrame {
         labelCountryInhabitants.setDisplayedMnemonic('P');
         labelCountryArea.setDisplayedMnemonic('R');
 
-        panelActions.setBorder(new EmptyBorder(10,0,40,0));
-        panelInputs.setBorder(new EmptyBorder(10,20,30,20));
+        panelActions.setBorder(new EmptyBorder(10, 0, 40, 0));
+        panelInputs.setBorder(new EmptyBorder(10, 20, 30, 20));
 
         add(panelActions, BorderLayout.NORTH);
         add(panelInputs, BorderLayout.CENTER);
         add(panelFlow, BorderLayout.SOUTH);
     }
 
-    private void addFlowButtons(){
+    private void addFlowButtons() {
         panelFlow.add(buttonConfirm);
         panelFlow.add(buttonClear);
-        
+
         addButtonListeners();
 
         getRootPane().setDefaultButton(buttonConfirm);
@@ -118,13 +121,69 @@ public class GuiAppRunner extends JFrame {
         buttonClear.addActionListener(listener);
     }
 
-    public Country createNewCountry(){
+    public Country createNewCountry() {
         fieldCountryName.setText("");
         fieldCountryCapital.setText("");
         fieldCountryInhabitants.setText("");
         fieldCountryArea.setText("");
         setVisible(true);
-// todo create new country
-//        https://www.youtube.com/watch?v=9qwmQ--pksM&t=980s
+
+        if (confirmed) {
+            if (!Objects.equals(fieldCountryCapital.getText(), "")) {
+                return new Country(
+                        fieldCountryName.getText(),
+                        fieldCountryCapital.getText(),
+                        Long.parseLong(fieldCountryArea.getText()),
+                        Double.parseDouble(fieldCountryInhabitants.getText())
+                );
+            } else {
+                return new Country(fieldCountryName.getText());
+            }
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * In case that the name of the country that is being edited is already known, update the existing record
+     * In case that the name of the country is not known, create new record
+     *
+     * @param editedCoutnry - country to be edited
+     * @return Country
+     */
+    public Country editCountry(Country editedCoutnry) {
+        fieldCountryName.setText(editedCoutnry.getName());
+        fieldCountryCapital.setText(editedCoutnry.getCapital());
+        fieldCountryInhabitants.setText(Long.toString(editedCoutnry.getInhabitants()));
+        fieldCountryArea.setText(Double.toString(editedCoutnry.getArea()));
+        setVisible(true);
+        if (confirmed) {
+            String submittedName = fieldCountryName.getText();
+            boolean matchFound = false;
+            for (Country country : CountryManager.countries) {
+                if (Objects.equals(country.getName(), submittedName)) {
+                    country.setCapital(fieldCountryCapital.getText());
+                    country.setInhabitants(Long.parseLong(fieldCountryArea.getText()));
+                    country.setArea(Double.parseDouble(fieldCountryInhabitants.getText()));
+                    matchFound = true;
+                }
+            }
+            if (!matchFound) {
+                if (!Objects.equals(fieldCountryCapital.getText(), "")) {
+                    return new Country(
+                            fieldCountryName.getText(),
+                            fieldCountryCapital.getText(),
+                            Long.parseLong(fieldCountryArea.getText()),
+                            Double.parseDouble(fieldCountryInhabitants.getText())
+                    );
+                } else {
+                    return new Country(fieldCountryName.getText());
+                }
+            }
+        } else {
+            return null;
+        }
+        return null; // TODO: 20.02.2022 investigate why 
+    }
+    
 }

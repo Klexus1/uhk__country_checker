@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CountryManager implements IBaseCrudApp{
-    public List<Country> countries = new ArrayList<>();
+    public static List<Country> countries = new ArrayList<>();
 
     @Override
     public void createCountry(Country newCountry) {
