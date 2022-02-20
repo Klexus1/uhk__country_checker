@@ -16,6 +16,7 @@ public class GuiAppRunner extends JFrame {
 
     private final JPanel panelActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JPanel panelTextArea = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelFlow = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
     private final JButton buttonList = new JButton("Zobrazit seznam");
@@ -31,6 +32,8 @@ public class GuiAppRunner extends JFrame {
     private final JTextField fieldCountryInhabitants = new JTextField(15);
     private final JTextField fieldCountryArea = new JTextField(15);
 
+    private final JTextArea textArea = new JTextArea(10,20);
+
     private final JLabel labelCountryName = new JLabel("Název země");
     private final JLabel labelCountryCapital = new JLabel("Hlavní město");
     private final JLabel labelCountryInhabitants = new JLabel("Počet obyvatel");
@@ -40,6 +43,11 @@ public class GuiAppRunner extends JFrame {
 
     public static void main(String[] args) {
         new GuiAppRunner().setVisible(true);
+//        GuiAppRunner rnr = new GuiAppRunner();
+//        Country c = rnr.createNewCountry();
+//        if (c != null){
+//          System.out.println(c.getName());
+//        }
     }
 
     /**
@@ -54,8 +62,10 @@ public class GuiAppRunner extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBackground(Color.LIGHT_GRAY);
 
+
         addToolButtons();
         addFields();
+        addTextArea();
         addFlowButtons();
 
         pack();
@@ -78,6 +88,11 @@ public class GuiAppRunner extends JFrame {
 
         panelInputs.add(labelCountryArea);
         panelInputs.add(fieldCountryArea);
+
+    }
+
+    private void addTextArea() {
+        panelTextArea.add(textArea);
     }
 
     private void addFields() {
@@ -93,9 +108,11 @@ public class GuiAppRunner extends JFrame {
 
         panelActions.setBorder(new EmptyBorder(10, 0, 40, 0));
         panelInputs.setBorder(new EmptyBorder(10, 20, 30, 20));
+        panelTextArea.setBorder(new EmptyBorder(10, 20, 30, 20));
 
         add(panelActions, BorderLayout.NORTH);
         add(panelInputs, BorderLayout.CENTER);
+        add(panelTextArea, BorderLayout.WEST);
         add(panelFlow, BorderLayout.SOUTH);
     }
 
@@ -183,7 +200,7 @@ public class GuiAppRunner extends JFrame {
         } else {
             return null;
         }
-        return null; // TODO: 20.02.2022 investigate why 
+        return null; // TODO: 20.02.2022 investigate why
     }
     
 }
