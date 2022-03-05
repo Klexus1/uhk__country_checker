@@ -11,6 +11,10 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.util.Objects;
 
+/**
+ * Class that spawns the app frame windown in which everything is inserted
+ */
+
 public class GuiAppRunner extends JFrame {
 //        https://www.youtube.com/watch?v=9qwmQ--pksM&t=980s
 
@@ -99,7 +103,9 @@ public class GuiAppRunner extends JFrame {
         labelCountryName.setLabelFor(fieldCountryName);
         labelCountryCapital.setLabelFor(fieldCountryCapital);
         labelCountryInhabitants.setLabelFor(fieldCountryInhabitants);
+        labelCountryInhabitants.setToolTipText("Zadejte číslo bez mezer");
         labelCountryArea.setLabelFor(fieldCountryArea);
+        labelCountryArea.setToolTipText("Zadejte v km2");
 
         labelCountryName.setDisplayedMnemonic('J');
         labelCountryCapital.setDisplayedMnemonic('H');
