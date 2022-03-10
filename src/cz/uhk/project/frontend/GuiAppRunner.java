@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.*;
 
@@ -143,6 +144,49 @@ public class GuiAppRunner extends JFrame {
 
     private void addButtonListeners() {
         logger.info("Adding button listeners.");
+
+        addClearConfirmButtonListeners();
+        addAddButtonListeners();
+        addListButtonListeners();
+    }
+
+    private void addListButtonListeners() {
+        logger.info("Adding List button listeners.");
+        ActionListener ListCountriesActionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                logger.info("Received request to list countries.");
+                textArea.setText("");
+                List<Country> countries = CountryManager.countries;
+                if (countries.size() == 0){
+                    logger.info("No entries found for countries in country lsit.");
+                    textArea.append("Žádné záznamy.");
+                } else {
+                    for (Country country : countries){
+                        textArea.append(country.getName() + "\n");
+                    }
+                }
+            }
+        };
+        buttonList.addActionListener(ListCountriesActionListener);
+    }
+
+    private void addAddButtonListeners() {
+        logger.info("Adding Add button listeners.");
+        ActionListener addCountryActionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Country c = createNewCountry();
+                CountryManager.countries.add(c);
+                clearFields();
+            }
+        };
+
+        buttonCreate.addActionListener(addCountryActionListener);
+    }
+
+    private void addClearConfirmButtonListeners() {
+        logger.info("Adding Clear and Confirm button listeners.");
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -154,17 +198,22 @@ public class GuiAppRunner extends JFrame {
         buttonClear.addActionListener(listener);
     }
 
-    public Country createNewCountry() {
-        logger.info("Entering the Create new Country block.");
+    public void clearFields () {
         fieldCountryName.setText("");
         fieldCountryCapital.setText("");
         fieldCountryInhabitants.setText("");
         fieldCountryArea.setText("");
+    }
+
+    public Country createNewCountry() {
+        logger.info("Entering the Create new Country block.");
         setVisible(true);
-
-
-        if (confirmed) {
-            if (!Objects.equals(fieldCountryCapital.getText(), "")) {
+            if (
+                    !Objects.equals(fieldCountryName.getText(), "") &&
+                    !Objects.equals(fieldCountryCapital.getText(), "") &&
+                    !Objects.equals(fieldCountryArea.getText(), "") &&
+                    !Objects.equals(fieldCountryInhabitants.getText(), "")
+            ) {
                 logger.info("Creating new country with all fields.");
                 System.out.println("Creating new Country");
                 return new Country(
@@ -173,14 +222,14 @@ public class GuiAppRunner extends JFrame {
                         Long.parseLong(fieldCountryArea.getText()),
                         Double.parseDouble(fieldCountryInhabitants.getText())
                 );
-            } else {
+            } else if(
+                    !Objects.equals(fieldCountryName.getText(), "")
+            ) {
                 logger.info("Creating new country with just country name.");
                 return new Country(fieldCountryName.getText());
             }
-        } else {
-            logger.info("No country created.");
-            return null;
-        }
+        logger.info("No country created.");
+        return null;
     }
 
     /**
