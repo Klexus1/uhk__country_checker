@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.logging.*;
 
@@ -32,15 +33,15 @@ public class GuiAppRunner extends JFrame {
     private final JButton buttonUpdate = new JButton("Aktualizovat záznam");
     private final JButton buttonDelete = new JButton("Odstranit záznam");
 
-    private final JButton buttonConfirm = new JButton("Ok");
-    private final JButton buttonClear = new JButton("Zrušit");
+    private final JButton buttonExit = new JButton("Ukončit");
+    private final JButton buttonClear = new JButton("Vyčistit pole");
 
     private final JTextField fieldCountryName = new JTextField(15);
     private final JTextField fieldCountryCapital = new JTextField(15);
     private final JTextField fieldCountryInhabitants = new JTextField(15);
     private final JTextField fieldCountryArea = new JTextField(15);
 
-    private final JTextArea textArea = new JTextArea(10,20);
+    private final JTextArea textArea = new JTextArea(10,40);
 
     private final JLabel labelCountryName = new JLabel("Název země");
     private final JLabel labelCountryCapital = new JLabel("Hlavní město");
@@ -133,12 +134,12 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addFlowButtons() {
-        panelFlow.add(buttonConfirm);
+        panelFlow.add(buttonExit);
         panelFlow.add(buttonClear);
 
         addButtonListeners();
 
-        getRootPane().setDefaultButton(buttonConfirm);
+        getRootPane().setDefaultButton(buttonExit);
 
     }
 
@@ -148,6 +149,7 @@ public class GuiAppRunner extends JFrame {
         addClearConfirmButtonListeners();
         addAddButtonListeners();
         addListButtonListeners();
+        addUpdateButtonListeners();
     }
 
     private void addListButtonListeners() {
@@ -163,12 +165,35 @@ public class GuiAppRunner extends JFrame {
                     textArea.append("Žádné záznamy.");
                 } else {
                     for (Country country : countries){
-                        textArea.append(country.getName() + "\n");
+                        String cap = !Objects.equals(country.getCapital(), null) ? country.getCapital() : "-";
+                        long inh = country.getInhabitants() > 0 ? country.getInhabitants() : 0;
+                        double area = country.getArea() > 0 ? country.getArea() : 0;
+
+                        textArea.append(country.getName() +
+                            " | " +
+                            cap +
+                            " | " +
+                            inh +
+                            " obyv. | " +
+                            area + " km2\n");
                     }
                 }
             }
         };
         buttonList.addActionListener(ListCountriesActionListener);
+    }
+
+    private void addUpdateButtonListeners() {
+        logger.info("Adding List button listeners.");
+        ActionListener UpdateCountriesActionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                logger.info("Received request to edit a country.");
+                editCountry();
+                clearFields();
+            }
+        };
+        buttonList.addActionListener(UpdateCountriesActionListener);
     }
 
     private void addAddButtonListeners() {
@@ -186,16 +211,22 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addClearConfirmButtonListeners() {
-        logger.info("Adding Clear and Confirm button listeners.");
-        ActionListener listener = new ActionListener() {
+        logger.info("Adding Exit and Clear button listeners.");
+        ActionListener exitListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                confirmed = actionEvent.getSource() == buttonConfirm;
+                confirmed = actionEvent.getSource() == buttonExit;
                 setVisible(false);
             }
         };
-        buttonConfirm.addActionListener(listener);
-        buttonClear.addActionListener(listener);
+        ActionListener clearListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                clearFields();
+            }
+        };
+        buttonExit.addActionListener(exitListener);
+        buttonClear.addActionListener(clearListener);
     }
 
     public void clearFields () {
@@ -208,82 +239,76 @@ public class GuiAppRunner extends JFrame {
     public Country createNewCountry() {
         logger.info("Entering the Create new Country block.");
         setVisible(true);
-            if (
-                    !Objects.equals(fieldCountryName.getText(), "") &&
-                    !Objects.equals(fieldCountryCapital.getText(), "") &&
-                    !Objects.equals(fieldCountryArea.getText(), "") &&
-                    !Objects.equals(fieldCountryInhabitants.getText(), "")
+            if(
+                !Objects.equals(fieldCountryName.getText(), "")
             ) {
                 logger.info("Creating new country with all fields.");
-                System.out.println("Creating new Country");
+                long area = 0;
+                long inhab = 0;
+                try{
+                    area = Long.parseLong(fieldCountryArea.getText());
+                } catch (Exception ignored){
+                }
+                try{
+                    inhab = Long.parseLong(fieldCountryArea.getText());
+                } catch (Exception ignored){
+                }
                 return new Country(
-                        fieldCountryName.getText(),
-                        fieldCountryCapital.getText(),
-                        Long.parseLong(fieldCountryArea.getText()),
-                        Double.parseDouble(fieldCountryInhabitants.getText())
+                                fieldCountryName.getText(),
+                                fieldCountryCapital.getText(),
+                                area,
+                                inhab
                 );
-            } else if(
-                    !Objects.equals(fieldCountryName.getText(), "")
-            ) {
-                logger.info("Creating new country with just country name.");
-                return new Country(fieldCountryName.getText());
-            }
-        logger.info("No country created.");
-        return null;
+            } else {
+                logger.info("No country created.");
+                return null;
+        }
     }
 
     /**
      * In case that the name of the country that is being edited is already known, update the existing record
      * In case that the name of the country is not known, create new record
      *
-     * @param editedCoutnry - country to be edited
+     * @param
      * @return Country
      */
-    public Country editCountry(Country editedCoutnry) {
-        logger.info("Entering the Edit new Country block.");
-
-
-        fieldCountryName.setText(editedCoutnry.getName());
-        fieldCountryCapital.setText(editedCoutnry.getCapital());
-        fieldCountryInhabitants.setText(Long.toString(editedCoutnry.getInhabitants()));
-        fieldCountryArea.setText(Double.toString(editedCoutnry.getArea()));
+    public Country editCountry() {
+        logger.info("Entering the Edit or create new Country block.");
         setVisible(true);
-        if (confirmed) {
-            String submittedName = fieldCountryName.getText();
-            boolean matchFound = false;
-            for (Country country : CountryManager.countries) {
-                if (Objects.equals(country.getName(), submittedName)) {
-                    country.setCapital(fieldCountryCapital.getText());
-                    country.setInhabitants(Long.parseLong(fieldCountryArea.getText()));
-                    country.setArea(Double.parseDouble(fieldCountryInhabitants.getText()));
-                    matchFound = true;
-                    logger.info("A country with this name already found.");
-                }
+        String submittedName = fieldCountryName.getText();
+        boolean matchFound = false;
+        for (Country country : CountryManager.countries) {
+            if (Objects.equals(country.getName().toLowerCase(Locale.ROOT), submittedName.toLowerCase(Locale.ROOT))) {
+                country.setCapital(fieldCountryCapital.getText());
+                country.setInhabitants(Long.parseLong(fieldCountryArea.getText()));
+                country.setArea(Double.parseDouble(fieldCountryInhabitants.getText()));
+                matchFound = true;
+                logger.info("A country with this name already found.");
             }
-            if (!matchFound) {
-                logger.info("A country with this name wasn't found.");
-                if (
-                        !Objects.equals(fieldCountryCapital.getText(), "") &&
-                        !Objects.equals(fieldCountryArea.getText(), "") &&
-                        !Objects.equals(fieldCountryInhabitants.getText(), "")
-                ) {
-                    logger.info("All country fields filled in - creating new country");
-                    return new Country(
-                            fieldCountryName.getText(),
-                            fieldCountryCapital.getText(),
-                            Long.parseLong(fieldCountryArea.getText()),
-                            Double.parseDouble(fieldCountryInhabitants.getText())
-                    );
-                } else {
-                    logger.info("Only a country name found - creating new country");
-                    return new Country(fieldCountryName.getText());
-                }
-            }
-        } else {
-            logger.info("Neither a matching country found nor the fields filled in correctly - returning null");
-            return null;
         }
-        return null; // TODO: 20.02.2022 investigate why
+        if (!matchFound) {
+            logger.info("A country with this name wasn't found.");
+            if (
+                    !Objects.equals(fieldCountryName.getText(), "")
+            ) {
+                logger.info("Creating new country - an existing country with a matching name wasn't found.");
+                Country newCountry = new Country(
+                        fieldCountryName.getText(),
+                        fieldCountryCapital.getText(),
+                        Long.parseLong(fieldCountryArea.getText()),
+                        Double.parseDouble(fieldCountryInhabitants.getText())
+                );
+                clearFields();
+                return newCountry;
+            } else {
+                logger.info("Country details not filled in, returning null");
+                clearFields();
+                return null;
+            }
+            }
+        clearFields();
+        logger.info("Neither a matching country found nor the fields filled in correctly - returning null");
+        return null;
     }
     
 }
