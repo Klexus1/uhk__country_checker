@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.util.Objects;
+import java.util.logging.*;
 
 /**
  * Class that spawns the app frame windown in which everything is inserted
@@ -17,6 +18,8 @@ import java.util.Objects;
 
 public class GuiAppRunner extends JFrame {
 //        https://www.youtube.com/watch?v=9qwmQ--pksM&t=980s
+
+    private final static Logger logger = Logger.getLogger(GuiAppRunner.class.getName());
 
     private final JPanel panelActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -46,6 +49,7 @@ public class GuiAppRunner extends JFrame {
     private boolean confirmed = false;
 
     public static void main(String[] args) {
+        logger.info("Starting the main block.");
         new GuiAppRunner().setVisible(true);
 //        GuiAppRunner rnr = new GuiAppRunner();
 //        Country c = rnr.createNewCountry();
@@ -59,10 +63,12 @@ public class GuiAppRunner extends JFrame {
      */
     public GuiAppRunner() {
         super("COUNTRY CHECKER");
+        logger.info("Starting the GuiAppRunner.");
         init();
     }
 
     private void init() {
+        logger.info("Initializing GuiAppRunner JFrame instance.");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBackground(Color.LIGHT_GRAY);
 
@@ -76,6 +82,7 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addToolButtons() {
+        logger.info("Adding tool buttons.");
         panelActions.add(buttonList);
         panelActions.add(buttonCreate);
         panelActions.add(buttonUpdate);
@@ -96,10 +103,12 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addTextArea() {
+        textArea.setEditable(false);
         panelTextArea.add(textArea);
     }
 
     private void addFields() {
+        logger.info("Adding fields.");
         labelCountryName.setLabelFor(fieldCountryName);
         labelCountryCapital.setLabelFor(fieldCountryCapital);
         labelCountryInhabitants.setLabelFor(fieldCountryInhabitants);
@@ -133,6 +142,7 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addButtonListeners() {
+        logger.info("Adding button listeners.");
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -145,14 +155,18 @@ public class GuiAppRunner extends JFrame {
     }
 
     public Country createNewCountry() {
+        logger.info("Entering the Create new Country block.");
         fieldCountryName.setText("");
         fieldCountryCapital.setText("");
         fieldCountryInhabitants.setText("");
         fieldCountryArea.setText("");
         setVisible(true);
 
+
         if (confirmed) {
             if (!Objects.equals(fieldCountryCapital.getText(), "")) {
+                logger.info("Creating new country with all fields.");
+                System.out.println("Creating new Country");
                 return new Country(
                         fieldCountryName.getText(),
                         fieldCountryCapital.getText(),
@@ -160,9 +174,11 @@ public class GuiAppRunner extends JFrame {
                         Double.parseDouble(fieldCountryInhabitants.getText())
                 );
             } else {
+                logger.info("Creating new country with just country name.");
                 return new Country(fieldCountryName.getText());
             }
         } else {
+            logger.info("No country created.");
             return null;
         }
     }
@@ -175,6 +191,9 @@ public class GuiAppRunner extends JFrame {
      * @return Country
      */
     public Country editCountry(Country editedCoutnry) {
+        logger.info("Entering the Edit new Country block.");
+
+
         fieldCountryName.setText(editedCoutnry.getName());
         fieldCountryCapital.setText(editedCoutnry.getCapital());
         fieldCountryInhabitants.setText(Long.toString(editedCoutnry.getInhabitants()));
@@ -189,10 +208,17 @@ public class GuiAppRunner extends JFrame {
                     country.setInhabitants(Long.parseLong(fieldCountryArea.getText()));
                     country.setArea(Double.parseDouble(fieldCountryInhabitants.getText()));
                     matchFound = true;
+                    logger.info("A country with this name already found.");
                 }
             }
             if (!matchFound) {
-                if (!Objects.equals(fieldCountryCapital.getText(), "")) {
+                logger.info("A country with this name wasn't found.");
+                if (
+                        !Objects.equals(fieldCountryCapital.getText(), "") &&
+                        !Objects.equals(fieldCountryArea.getText(), "") &&
+                        !Objects.equals(fieldCountryInhabitants.getText(), "")
+                ) {
+                    logger.info("All country fields filled in - creating new country");
                     return new Country(
                             fieldCountryName.getText(),
                             fieldCountryCapital.getText(),
@@ -200,10 +226,12 @@ public class GuiAppRunner extends JFrame {
                             Double.parseDouble(fieldCountryInhabitants.getText())
                     );
                 } else {
+                    logger.info("Only a country name found - creating new country");
                     return new Country(fieldCountryName.getText());
                 }
             }
         } else {
+            logger.info("Neither a matching country found nor the fields filled in correctly - returning null");
             return null;
         }
         return null; // TODO: 20.02.2022 investigate why
