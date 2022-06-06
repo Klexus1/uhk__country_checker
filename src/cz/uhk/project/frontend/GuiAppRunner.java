@@ -8,7 +8,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -53,11 +52,6 @@ public class GuiAppRunner extends JFrame {
     public static void main(String[] args) {
         logger.info("Starting the main block.");
         new GuiAppRunner().setVisible(true);
-//        GuiAppRunner rnr = new GuiAppRunner();
-//        Country c = rnr.createNewCountry();
-//        if (c != null){
-//          System.out.println(c.getName());
-//        }
     }
 
     /**
@@ -271,15 +265,11 @@ public class GuiAppRunner extends JFrame {
     /**
      * In case that the name of the country that is being edited is already known, update the existing record
      * In case that the name of the country is not known, create new record
-     *
-     * @param
-     * @return Country
      */
-    public Country editCountry() {
+    public void editCountry() {
         logger.info("Entering the Edit or create new Country block.");
         setVisible(true);
         String submittedName = fieldCountryName.getText();
-        boolean matchFound = false;
         for (Country country : CountryManager.countries) {
             if (Objects.equals(country.getName().toLowerCase(Locale.ROOT), submittedName.toLowerCase(Locale.ROOT))) {
                 country.setCapital(fieldCountryCapital.getText());
@@ -293,37 +283,26 @@ public class GuiAppRunner extends JFrame {
                 } else {
                     country.setArea(0);
                 }
-                matchFound = true;
-                logger.info("A country with this name already found.");
+                logger.info("A country with this name found and updated.");
             }
         }
-        if (!matchFound) {
-            logger.info("A country with this name wasn't found.");
-            if (
-                    !Objects.equals(fieldCountryName.getText(), "")
-            ) {
-                logger.info("Creating new country - an existing country with a matching name wasn't found.");
-                Country newCountry = new Country(
-                        fieldCountryName.getText(),
-                        fieldCountryCapital.getText(),
-                        !Objects.equals(fieldCountryArea.getText(), "") ? Long.parseLong(fieldCountryArea.getText()) : 0,
-                        !Objects.equals(fieldCountryInhabitants.getText(), "") ? Double.parseDouble(fieldCountryInhabitants.getText()) : 0
-                );
-                clearFields();
-                return newCountry;
-            } else {
-                logger.info("Country details not filled in, returning null");
-                clearFields();
-                return null;
-            }
-            }
-        clearFields();
-        if (matchFound){
-            logger.info("Country creation block finishing.");
+        logger.info("A country with this name wasn't found.");
+        if (
+                !Objects.equals(fieldCountryName.getText(), "")
+        ) {
+            logger.info("Creating new country - an existing country with a matching name wasn't found.");
+            Country newCountry = new Country(
+                    fieldCountryName.getText(),
+                    fieldCountryCapital.getText(),
+                    !Objects.equals(fieldCountryArea.getText(), "") ? Long.parseLong(fieldCountryArea.getText()) : 0,
+                    !Objects.equals(fieldCountryInhabitants.getText(), "") ? Double.parseDouble(fieldCountryInhabitants.getText()) : 0
+            );
+            clearFields();
+            logger.info("New country created.");
         } else {
-            logger.info("Neither a matching country found nor the fields filled in correctly - returning null");
+            logger.info("Country details not filled in.");
+            clearFields();
         }
-        return null;
     }
     
 }
