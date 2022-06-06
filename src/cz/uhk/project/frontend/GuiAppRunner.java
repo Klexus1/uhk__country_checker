@@ -169,7 +169,10 @@ public class GuiAppRunner extends JFrame {
                         long inh = country.getInhabitants() > 0 ? country.getInhabitants() : 0;
                         double area = country.getArea() > 0 ? country.getArea() : 0;
 
-                        textArea.append(country.getName() +
+                        textArea.append(
+                            country.getCountryId() +
+                            ".  -  " +
+                            country.getName() +
                             " | " +
                             cap +
                             " | " +
@@ -184,7 +187,7 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addUpdateButtonListeners() {
-        logger.info("Adding List button listeners.");
+        logger.info("Adding Update button listeners.");
         ActionListener UpdateCountriesActionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -193,7 +196,7 @@ public class GuiAppRunner extends JFrame {
                 clearFields();
             }
         };
-        buttonList.addActionListener(UpdateCountriesActionListener);
+        buttonUpdate.addActionListener(UpdateCountriesActionListener);
     }
 
     private void addAddButtonListeners() {
@@ -280,8 +283,16 @@ public class GuiAppRunner extends JFrame {
         for (Country country : CountryManager.countries) {
             if (Objects.equals(country.getName().toLowerCase(Locale.ROOT), submittedName.toLowerCase(Locale.ROOT))) {
                 country.setCapital(fieldCountryCapital.getText());
-                country.setInhabitants(Long.parseLong(fieldCountryArea.getText()));
-                country.setArea(Double.parseDouble(fieldCountryInhabitants.getText()));
+                if (!Objects.equals(fieldCountryArea.getText(), "")) {
+                    country.setArea(Double.parseDouble(fieldCountryArea.getText()));
+                } else {
+                    country.setInhabitants(0);
+                }
+                if (!Objects.equals(fieldCountryInhabitants.getText(), "")){
+                    country.setInhabitants(Long.parseLong(fieldCountryInhabitants.getText()));
+                } else {
+                    country.setArea(0);
+                }
                 matchFound = true;
                 logger.info("A country with this name already found.");
             }
@@ -295,8 +306,8 @@ public class GuiAppRunner extends JFrame {
                 Country newCountry = new Country(
                         fieldCountryName.getText(),
                         fieldCountryCapital.getText(),
-                        Long.parseLong(fieldCountryArea.getText()),
-                        Double.parseDouble(fieldCountryInhabitants.getText())
+                        !Objects.equals(fieldCountryArea.getText(), "") ? Long.parseLong(fieldCountryArea.getText()) : 0,
+                        !Objects.equals(fieldCountryInhabitants.getText(), "") ? Double.parseDouble(fieldCountryInhabitants.getText()) : 0
                 );
                 clearFields();
                 return newCountry;
@@ -307,7 +318,11 @@ public class GuiAppRunner extends JFrame {
             }
             }
         clearFields();
-        logger.info("Neither a matching country found nor the fields filled in correctly - returning null");
+        if (matchFound){
+            logger.info("Country creation block finishing.");
+        } else {
+            logger.info("Neither a matching country found nor the fields filled in correctly - returning null");
+        }
         return null;
     }
     
