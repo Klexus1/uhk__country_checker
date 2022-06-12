@@ -26,6 +26,10 @@ public class Country {
         this.id = getId();
     }
 
+    public long getCountryId(){
+        return this.id;
+    }
+
     public String getName() {
         return name;
     }
