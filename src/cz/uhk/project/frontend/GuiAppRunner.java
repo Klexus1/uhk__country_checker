@@ -2,13 +2,13 @@ package cz.uhk.project.frontend;
 
 import cz.uhk.project.backend.Country;
 import cz.uhk.project.backend.CountryManager;
+import cz.uhk.project.data.DataHandler;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -32,6 +32,9 @@ public class GuiAppRunner extends JFrame {
     private final JButton buttonCreate = new JButton("Přidat záznam");
     private final JButton buttonUpdate = new JButton("Aktualizovat záznam");
     private final JButton buttonDelete = new JButton("Odstranit záznam");
+
+    private final JButton buttonSave = new JButton("Uložit");
+    private final JButton buttonLoad = new JButton("Načíst");
 
     private final JButton buttonExit = new JButton("Ukončit");
     private final JButton buttonClear = new JButton("Vyčistit pole");
@@ -134,8 +137,10 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addFlowButtons() {
-        panelFlow.add(buttonExit);
+        panelFlow.add(buttonSave);
+        panelFlow.add(buttonLoad);
         panelFlow.add(buttonClear);
+        panelFlow.add(buttonExit);
 
         addButtonListeners();
 
@@ -150,6 +155,8 @@ public class GuiAppRunner extends JFrame {
         addAddButtonListeners();
         addListButtonListeners();
         addUpdateButtonListeners();
+
+        addSaveButtonListener();
     }
 
     private void addListButtonListeners() {
@@ -210,6 +217,21 @@ public class GuiAppRunner extends JFrame {
         buttonCreate.addActionListener(addCountryActionListener);
     }
 
+    private void addSaveButtonListener() {
+        logger.info("Adding save button listener - writing countries to CountryData.txt.");
+        ActionListener saveListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                boolean save;
+                save = actionEvent.getSource() == buttonSave;
+                if (save){
+                    DataHandler.saveDataToFile(CountryManager.countries);
+                }
+            }
+        };
+        buttonSave.addActionListener(saveListener);
+    }
+
     private void addClearConfirmButtonListeners() {
         logger.info("Adding Exit and Clear button listeners.");
         ActionListener exitListener = new ActionListener() {
@@ -250,7 +272,7 @@ public class GuiAppRunner extends JFrame {
                 } catch (Exception ignored){
                 }
                 try{
-                    inhab = Long.parseLong(fieldCountryArea.getText());
+                    inhab = Long.parseLong(fieldCountryInhabitants.getText());
                 } catch (Exception ignored){
                 }
                 return new Country(
@@ -310,5 +332,4 @@ public class GuiAppRunner extends JFrame {
         logger.info("Neither a matching country found nor the fields filled in correctly - returning null");
         return null;
     }
-    
 }
