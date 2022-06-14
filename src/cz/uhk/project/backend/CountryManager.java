@@ -34,4 +34,8 @@ public class CountryManager implements IBaseCrudApp{
     public int countryCount() {
         return countries.size();
     }
+
+    public static boolean countryExists(String name){
+        return countries.stream().anyMatch(c -> c.getName().equals(name));
+    }
 }

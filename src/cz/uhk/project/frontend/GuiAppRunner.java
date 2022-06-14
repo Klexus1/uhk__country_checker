@@ -152,6 +152,7 @@ public class GuiAppRunner extends JFrame {
         addUpdateButtonListeners();
 
         addSaveButtonListener();
+        addLoadButtonListener();
     }
 
     private void addListButtonListeners() {
@@ -216,7 +217,7 @@ public class GuiAppRunner extends JFrame {
     }
 
     private void addSaveButtonListener() {
-        logger.info("Adding save button listener - writing countries to CountryData.txt.");
+        logger.info("Adding save button listener - writes countries to CountryData.txt.");
         ActionListener saveListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -228,6 +229,21 @@ public class GuiAppRunner extends JFrame {
             }
         };
         buttonSave.addActionListener(saveListener);
+    }
+
+    private void addLoadButtonListener() {
+        logger.info("Adding load button listener - loads countries from CountryData.txt.");
+        ActionListener loadListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                boolean load;
+                load = actionEvent.getSource() == buttonLoad;
+                if (load){
+                    DataHandler.readDataFromFile();
+                }
+            }
+        };
+        buttonLoad.addActionListener(loadListener);
     }
 
     private void addClearConfirmButtonListeners() {
@@ -276,8 +292,8 @@ public class GuiAppRunner extends JFrame {
                 return new Country(
                                 fieldCountryName.getText(),
                                 fieldCountryCapital.getText(),
-                                area,
-                                inhab
+                                inhab,
+                                area
                 );
             } else {
                 logger.info("No country created.");
