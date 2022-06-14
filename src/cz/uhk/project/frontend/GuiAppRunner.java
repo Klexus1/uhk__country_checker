@@ -224,7 +224,6 @@ public class GuiAppRunner extends JFrame {
         addCountriesToTextArea(countries);
     }
 
-
     private void addSearchButtonListeners() {
         logger.info("Adding Search button listeners.");
         ActionListener SearchButtonListener = actionEvent -> {

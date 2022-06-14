@@ -72,15 +72,23 @@ public class CountryManager implements IBaseCrudApp{
 
     public static void filterCountriesByField(String param) {
         logger.info("Applying countries' ordering filter. Filtering by: " + param);
-        switch (param){
-            case "name":
+        switch (param) {
+            case "name" -> {
                 countries.sort(Comparator.comparing(Country::getName));
-            case "capital":
+//                Collections.reverse(countries);
+            }
+            case "capital" -> {
                 countries.sort(Comparator.comparing(Country::getCapital));
-            case "inhabitants":
+//                Collections.reverse(countries);
+            }
+            case "inhabitants" -> {
                 countries.sort(Comparator.comparing(Country::getInhabitants));
-            case "area":
+                Collections.reverse(countries);
+            }
+            case "area" -> {
                 countries.sort(Comparator.comparing(Country::getArea));
+                Collections.reverse(countries);
+            }
         }
     }
 
