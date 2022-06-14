@@ -8,7 +8,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -25,10 +24,17 @@ public class GuiAppRunner extends JFrame {
 
     private final JPanel panelCountryActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelSearchAndFilter = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JPanel panelOrderCountries = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelActions = new JPanel();
     private final JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelTextArea = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelFlow = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+    private final JButton buttonOrderByName = new JButton("Názvu");
+    private final JButton buttonOrderByCapital = new JButton("Hl. města");
+    private final JButton buttonOrderByInhab = new JButton("Počtu obyvatel");
+    private final JButton buttonOrderByArea = new JButton("Rozlohy");
+    private final JTextField orderByText = new JTextField();
 
     private final JButton buttonList = new JButton("Zobrazit seznam");
     private final JButton buttonCreate = new JButton("Přidat záznam");
@@ -78,6 +84,7 @@ public class GuiAppRunner extends JFrame {
 
         addToolButtons();
         addFields();
+        addSearchByText();
         addTextArea();
         addFlowButtons();
 
@@ -96,6 +103,11 @@ public class GuiAppRunner extends JFrame {
         panelSearchAndFilter.add(buttonSearch);
         panelSearchAndFilter.add(searchArea);
 
+        panelOrderCountries.add(orderByText);
+        panelOrderCountries.add(buttonOrderByName);
+        panelOrderCountries.add(buttonOrderByCapital);
+        panelOrderCountries.add(buttonOrderByInhab);
+        panelOrderCountries.add(buttonOrderByArea);
 
         panelInputs.add(labelCountryName);
         panelInputs.add(fieldCountryName);
@@ -116,6 +128,11 @@ public class GuiAppRunner extends JFrame {
         panelTextArea.add(textArea);
     }
 
+    private void addSearchByText() {
+        orderByText.setEditable(false);
+        orderByText.setText("Řadit podle:");
+    }
+
     private void addFields() {
         logger.info("Adding fields.");
         labelCountryName.setLabelFor(fieldCountryName);
@@ -134,9 +151,11 @@ public class GuiAppRunner extends JFrame {
         panelInputs.setBorder(new EmptyBorder(10, 20, 30, 20));
         panelTextArea.setBorder(new EmptyBorder(10, 20, 30, 20));
         panelSearchAndFilter.setBorder(new EmptyBorder(10, 10, 20, 10));
+        panelOrderCountries.setBorder(new EmptyBorder(10, 10, 20, 10));
 
         panelActions.add(panelSearchAndFilter);
         panelActions.add(panelCountryActions);
+        panelActions.add(panelOrderCountries);
         add(panelActions, BorderLayout.NORTH);
         add(panelInputs, BorderLayout.CENTER);
         add(panelTextArea, BorderLayout.WEST);
@@ -158,7 +177,7 @@ public class GuiAppRunner extends JFrame {
     private void addButtonListeners() {
         logger.info("Adding button listeners.");
 
-        addButtonSearchListeners();
+        addSearchButtonListeners();
 
         addClearConfirmButtonListeners();
         addAddButtonListeners();
@@ -171,8 +190,10 @@ public class GuiAppRunner extends JFrame {
     }
 
     public void addCountriesToTextArea(List<Country> countries){
+        logger.info("Starting to show countries in the text area.");
+        textArea.setText("");
         if (countries.size() == 0){
-            logger.info("No entries found for countries in country lsit.");
+            logger.info("No entries found for countries in country list.");
             textArea.append("Žádné záznamy.");
         } else {
             for (Country country : countries){
@@ -198,22 +219,20 @@ public class GuiAppRunner extends JFrame {
 
     public void listCountries(){
         logger.info("Received request to list countries.");
-        textArea.setText("");
         List<Country> countries = CountryManager.countries;
         addCountriesToTextArea(countries);
     }
 
 
-    private void addButtonSearchListeners() {
+    private void addSearchButtonListeners() {
         logger.info("Adding Search button listeners.");
         ActionListener SearchButtonListener = actionEvent -> {
                 String searchInput = searchArea.getText();
                 List<Country> searchedCountries = CountryManager.searchCountriesByName(searchInput);
                 showSearchResults(searchedCountries);
                 clearSearchField();
-                listCountries();
         };
-        buttonList.addActionListener(SearchButtonListener);
+        buttonSearch.addActionListener(SearchButtonListener);
     }
 
     private void showSearchResults(List<Country> countriesToShow) {
@@ -299,7 +318,10 @@ public class GuiAppRunner extends JFrame {
     private void addClearConfirmButtonListeners() {
         logger.info("Adding Exit and Clear button listeners.");
         ActionListener exitListener = actionEvent -> setVisible(false);
-        ActionListener clearListener = actionEvent -> clearFields();
+        ActionListener clearListener = actionEvent -> {
+            clearFields();
+            clearSearchField();
+        };
         buttonExit.addActionListener(exitListener);
         buttonClear.addActionListener(clearListener);
     }
