@@ -7,8 +7,8 @@ import cz.uhk.project.data.DataHandler;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -23,7 +23,9 @@ public class GuiAppRunner extends JFrame {
 
     private final static Logger logger = Logger.getLogger(GuiAppRunner.class.getName());
 
-    private final JPanel panelActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JPanel panelCountryActions = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JPanel panelSearchAndFilter = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    private final JPanel panelActions = new JPanel();
     private final JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelTextArea = new JPanel(new FlowLayout(FlowLayout.CENTER));
     private final JPanel panelFlow = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -32,6 +34,9 @@ public class GuiAppRunner extends JFrame {
     private final JButton buttonCreate = new JButton("Přidat záznam");
     private final JButton buttonUpdate = new JButton("Aktualizovat záznam");
     private final JButton buttonDelete = new JButton("Odstranit záznam podle jména");
+
+    private final JButton buttonSearch = new JButton("Vyhledat podle jména");
+    private final JTextField searchArea = new JTextField(15);
 
     private final JButton buttonSave = new JButton("Uložit");
     private final JButton buttonLoad = new JButton("Načíst");
@@ -50,8 +55,6 @@ public class GuiAppRunner extends JFrame {
     private final JLabel labelCountryCapital = new JLabel("Hlavní město");
     private final JLabel labelCountryInhabitants = new JLabel("Počet obyvatel");
     private final JLabel labelCountryArea = new JLabel("Rozloha");
-
-    private boolean confirmed = false;
 
     public static void main(String[] args) {
         logger.info("Starting the main block.");
@@ -83,10 +86,16 @@ public class GuiAppRunner extends JFrame {
 
     private void addToolButtons() {
         logger.info("Adding tool buttons.");
-        panelActions.add(buttonList);
-        panelActions.add(buttonCreate);
-        panelActions.add(buttonUpdate);
-        panelActions.add(buttonDelete);
+        panelActions.setLayout(new BoxLayout(panelActions, BoxLayout.Y_AXIS));
+
+        panelCountryActions.add(buttonList);
+        panelCountryActions.add(buttonCreate);
+        panelCountryActions.add(buttonUpdate);
+        panelCountryActions.add(buttonDelete);
+
+        panelSearchAndFilter.add(buttonSearch);
+        panelSearchAndFilter.add(searchArea);
+
 
         panelInputs.add(labelCountryName);
         panelInputs.add(fieldCountryName);
@@ -121,10 +130,13 @@ public class GuiAppRunner extends JFrame {
         labelCountryInhabitants.setDisplayedMnemonic('P');
         labelCountryArea.setDisplayedMnemonic('R');
 
-        panelActions.setBorder(new EmptyBorder(10, 0, 40, 0));
+        panelActions.setBorder(new EmptyBorder(10, 0, 30, 0));
         panelInputs.setBorder(new EmptyBorder(10, 20, 30, 20));
         panelTextArea.setBorder(new EmptyBorder(10, 20, 30, 20));
+        panelSearchAndFilter.setBorder(new EmptyBorder(10, 10, 20, 10));
 
+        panelActions.add(panelSearchAndFilter);
+        panelActions.add(panelCountryActions);
         add(panelActions, BorderLayout.NORTH);
         add(panelInputs, BorderLayout.CENTER);
         add(panelTextArea, BorderLayout.WEST);
@@ -146,6 +158,8 @@ public class GuiAppRunner extends JFrame {
     private void addButtonListeners() {
         logger.info("Adding button listeners.");
 
+        addButtonSearchListeners();
+
         addClearConfirmButtonListeners();
         addAddButtonListeners();
         addListButtonListeners();
@@ -156,10 +170,7 @@ public class GuiAppRunner extends JFrame {
         addLoadButtonListener();
     }
 
-    public void listCountries(){
-        logger.info("Received request to list countries.");
-        textArea.setText("");
-        List<Country> countries = CountryManager.countries;
+    public void addCountriesToTextArea(List<Country> countries){
         if (countries.size() == 0){
             logger.info("No entries found for countries in country lsit.");
             textArea.append("Žádné záznamy.");
@@ -185,53 +196,65 @@ public class GuiAppRunner extends JFrame {
         }
     }
 
+    public void listCountries(){
+        logger.info("Received request to list countries.");
+        textArea.setText("");
+        List<Country> countries = CountryManager.countries;
+        addCountriesToTextArea(countries);
+    }
+
+
+    private void addButtonSearchListeners() {
+        logger.info("Adding Search button listeners.");
+        ActionListener SearchButtonListener = actionEvent -> {
+                String searchInput = searchArea.getText();
+                List<Country> searchedCountries = CountryManager.searchCountriesByName(searchInput);
+                showSearchResults(searchedCountries);
+                clearSearchField();
+                listCountries();
+        };
+        buttonList.addActionListener(SearchButtonListener);
+    }
+
+    private void showSearchResults(List<Country> countriesToShow) {
+        logger.info("About to show the search results.");
+        addCountriesToTextArea(countriesToShow);
+    }
+
     private void addListButtonListeners() {
         logger.info("Adding List button listeners.");
-        ActionListener ListCountriesActionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                listCountries();
-            }
-        };
+        ActionListener ListCountriesActionListener = actionEvent -> listCountries();
         buttonList.addActionListener(ListCountriesActionListener);
     }
 
     private void addUpdateButtonListeners() {
         logger.info("Adding Update button listeners.");
-        ActionListener UpdateCountriesActionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                logger.info("Received request to edit a country.");
-                editCountry();
-                clearFields();
-            }
+        ActionListener UpdateCountriesActionListener = actionEvent -> {
+            logger.info("Received request to edit a country.");
+            editCountry();
+            listCountries();
+            clearFields();
         };
         buttonUpdate.addActionListener(UpdateCountriesActionListener);
     }
 
     private void addAddButtonListeners() {
         logger.info("Adding Add button listeners.");
-        ActionListener addCountryActionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                Country c = createNewCountry();
-                CountryManager.countries.add(c);
-                listCountries();
-                clearFields();
-            }
+        ActionListener addCountryActionListener = actionEvent -> {
+            Country c = createNewCountry();
+            CountryManager.countries.add(c);
+            listCountries();
+            clearFields();
         };
         buttonCreate.addActionListener(addCountryActionListener);
     }
 
     private void addDeleteButtonListeners() {
         logger.info("Adding Delete button listeners.");
-        ActionListener deleteCountryActionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                deleteCountry();
-                listCountries();
-                clearFields();
-            }
+        ActionListener deleteCountryActionListener = actionEvent -> {
+            deleteCountry();
+            listCountries();
+            clearFields();
         };
         buttonDelete.addActionListener(deleteCountryActionListener);
     }
@@ -250,14 +273,11 @@ public class GuiAppRunner extends JFrame {
 
     private void addSaveButtonListener() {
         logger.info("Adding save button listener - writes countries to CountryData.txt.");
-        ActionListener saveListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                boolean save;
-                save = actionEvent.getSource() == buttonSave;
-                if (save){
-                    DataHandler.saveDataToFile(CountryManager.countries);
-                }
+        ActionListener saveListener = actionEvent -> {
+            boolean save;
+            save = actionEvent.getSource() == buttonSave;
+            if (save){
+                DataHandler.saveDataToFile(CountryManager.countries);
             }
         };
         buttonSave.addActionListener(saveListener);
@@ -265,14 +285,12 @@ public class GuiAppRunner extends JFrame {
 
     private void addLoadButtonListener() {
         logger.info("Adding load button listener - loads countries from CountryData.txt.");
-        ActionListener loadListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                boolean load;
-                load = actionEvent.getSource() == buttonLoad;
-                if (load){
-                    DataHandler.readDataFromFile();
-                }
+        ActionListener loadListener = actionEvent -> {
+            boolean load;
+            load = actionEvent.getSource() == buttonLoad;
+            if (load){
+                DataHandler.readDataFromFile();
+                listCountries();
             }
         };
         buttonLoad.addActionListener(loadListener);
@@ -280,21 +298,14 @@ public class GuiAppRunner extends JFrame {
 
     private void addClearConfirmButtonListeners() {
         logger.info("Adding Exit and Clear button listeners.");
-        ActionListener exitListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                confirmed = actionEvent.getSource() == buttonExit;
-                setVisible(false);
-            }
-        };
-        ActionListener clearListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                clearFields();
-            }
-        };
+        ActionListener exitListener = actionEvent -> setVisible(false);
+        ActionListener clearListener = actionEvent -> clearFields();
         buttonExit.addActionListener(exitListener);
         buttonClear.addActionListener(clearListener);
+    }
+
+    public void clearSearchField () {
+        searchArea.setText("");
     }
 
     public void clearFields () {
@@ -360,7 +371,7 @@ public class GuiAppRunner extends JFrame {
                 !Objects.equals(fieldCountryName.getText(), "")
         ) {
             logger.info("Creating new country - an existing country with a matching name wasn't found.");
-            Country newCountry = new Country(
+            new Country(
                     fieldCountryName.getText(),
                     fieldCountryCapital.getText(),
                     !Objects.equals(fieldCountryArea.getText(), "") ? Long.parseLong(fieldCountryArea.getText()) : 0,

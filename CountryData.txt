@@ -1,2 +1,3 @@
 Česko|Praha|123|0.0
 Chorvatsko|Záhřeb|50000000|56000.0
+Panama|Panama|8000000|120000.0

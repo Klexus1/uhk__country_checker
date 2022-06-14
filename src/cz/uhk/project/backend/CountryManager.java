@@ -1,12 +1,17 @@
 package cz.uhk.project.backend;
 
+import cz.uhk.project.frontend.GuiAppRunner;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class CountryManager implements IBaseCrudApp{
+    private final static Logger logger = Logger.getLogger(GuiAppRunner.class.getName());
     public static List<Country> countries = new ArrayList<>();
+
 
     @Override
     public void createCountry(Country newCountry) {
@@ -57,4 +62,16 @@ public class CountryManager implements IBaseCrudApp{
         countries.remove(countryToDelete);
     }
 
+    public static List<Country> searchCountriesByName(String searchInput){
+        logger.info("Starting to search the countries list. Searching for: " + searchInput);
+        List<Country> countriesMatched = new ArrayList<>();
+
+        for (Country country : countries){
+            if (country.getName().contains(searchInput)){
+                countriesMatched.add(country);
+            }
+        }
+
+        return countriesMatched;
+    }
 }

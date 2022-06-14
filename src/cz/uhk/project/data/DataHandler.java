@@ -52,7 +52,7 @@ public class DataHandler {
             BufferedReader reader = new BufferedReader(new FileReader("CountryData.txt"));
             String line;
             while ((line = reader.readLine()) != null){
-                String [] country_details = line.split("|");
+                String [] country_details = line.split("\\|");
                 String country_name = country_details[0];
                 if (CountryManager.countryExists(country_name)){
                     continue;
@@ -74,12 +74,14 @@ public class DataHandler {
                     catch (Exception __){
                         country_area = 0;
                     }
-                    new Country(
+                    Country c = new Country(
                         country_name,
                         country_capital,
                         country_inhab,
                         country_area
                     );
+
+                    CountryManager.countries.add(c);
                 }
                 catch (NumberFormatException __){
                     logger.info("Failed to parse data for country " + country_details[0] + " - continuing to next one.");
