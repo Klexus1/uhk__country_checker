@@ -2,16 +2,12 @@ package cz.uhk.project.backend;
 
 import cz.uhk.project.frontend.GuiAppRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class CountryManager implements IBaseCrudApp{
     private final static Logger logger = Logger.getLogger(GuiAppRunner.class.getName());
     public static List<Country> countries = new ArrayList<>();
-
 
     @Override
     public void createCountry(Country newCountry) {
@@ -25,7 +21,6 @@ public class CountryManager implements IBaseCrudApp{
 
     @Override
     public void updateCountry() {
-
     }
 
     @Override
@@ -74,4 +69,19 @@ public class CountryManager implements IBaseCrudApp{
 
         return countriesMatched;
     }
+
+    public static void filterCountriesByField(String param) {
+        logger.info("Applying countries' ordering filter. Filtering by: " + param);
+        switch (param){
+            case "name":
+                countries.sort(Comparator.comparing(Country::getName));
+            case "capital":
+                countries.sort(Comparator.comparing(Country::getCapital));
+            case "inhabitants":
+                countries.sort(Comparator.comparing(Country::getInhabitants));
+            case "area":
+                countries.sort(Comparator.comparing(Country::getArea));
+        }
+    }
+
 }

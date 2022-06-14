@@ -81,7 +81,6 @@ public class GuiAppRunner extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBackground(Color.LIGHT_GRAY);
 
-
         addToolButtons();
         addFields();
         addSearchByText();
@@ -178,6 +177,8 @@ public class GuiAppRunner extends JFrame {
         logger.info("Adding button listeners.");
 
         addSearchButtonListeners();
+
+        addOrderingButtonListeners();
 
         addClearConfirmButtonListeners();
         addAddButtonListeners();
@@ -324,6 +325,32 @@ public class GuiAppRunner extends JFrame {
         };
         buttonExit.addActionListener(exitListener);
         buttonClear.addActionListener(clearListener);
+    }
+
+    private void addOrderingButtonListeners() {
+        logger.info("Adding Ordering buttons listeners.");
+
+        ActionListener OrderByNameListener = actionEvent ->{
+            CountryManager.filterCountriesByField("name");
+            listCountries();
+        };
+        ActionListener OrderByCapitalListener = actionEvent -> {
+            CountryManager.filterCountriesByField("capital");
+            listCountries();
+        };
+        ActionListener OrderByInhabListener = actionEvent -> {
+            CountryManager.filterCountriesByField("inhabitants");
+            listCountries();
+        };
+        ActionListener OrderByAreaListener = actionEvent -> {
+            CountryManager.filterCountriesByField("area");
+            listCountries();
+        };
+
+        buttonOrderByName.addActionListener(OrderByNameListener);
+        buttonOrderByCapital.addActionListener(OrderByCapitalListener);
+        buttonOrderByInhab.addActionListener(OrderByInhabListener);
+        buttonOrderByArea.addActionListener(OrderByAreaListener);
     }
 
     public void clearSearchField () {
