@@ -1,0 +1,2 @@
+Česko|Praha|123|0.0
+Chorvatsko|Záhřeb|50000000|56000.0

@@ -31,7 +31,7 @@ public class GuiAppRunner extends JFrame {
     private final JButton buttonList = new JButton("Zobrazit seznam");
     private final JButton buttonCreate = new JButton("Přidat záznam");
     private final JButton buttonUpdate = new JButton("Aktualizovat záznam");
-    private final JButton buttonDelete = new JButton("Odstranit záznam");
+    private final JButton buttonDelete = new JButton("Odstranit záznam podle jména");
 
     private final JButton buttonSave = new JButton("Uložit");
     private final JButton buttonLoad = new JButton("Načíst");
@@ -46,7 +46,7 @@ public class GuiAppRunner extends JFrame {
 
     private final JTextArea textArea = new JTextArea(10,40);
 
-    private final JLabel labelCountryName = new JLabel("Název země");
+    private final JLabel labelCountryName = new JLabel("Název země *");
     private final JLabel labelCountryCapital = new JLabel("Hlavní město");
     private final JLabel labelCountryInhabitants = new JLabel("Počet obyvatel");
     private final JLabel labelCountryArea = new JLabel("Rozloha");
@@ -150,9 +150,39 @@ public class GuiAppRunner extends JFrame {
         addAddButtonListeners();
         addListButtonListeners();
         addUpdateButtonListeners();
+        addDeleteButtonListeners();
 
         addSaveButtonListener();
         addLoadButtonListener();
+    }
+
+    public void listCountries(){
+        logger.info("Received request to list countries.");
+        textArea.setText("");
+        List<Country> countries = CountryManager.countries;
+        if (countries.size() == 0){
+            logger.info("No entries found for countries in country lsit.");
+            textArea.append("Žádné záznamy.");
+        } else {
+            for (Country country : countries){
+                if (country != null){
+                    String cap = !Objects.equals(country.getCapital(), null) ? country.getCapital() : "-";
+                    long inh = country.getInhabitants() > 0 ? country.getInhabitants() : 0;
+                    double area = country.getArea() > 0 ? country.getArea() : 0;
+
+                    textArea.append(
+                            country.getCountryId() +
+                                    ".  -  " +
+                                    country.getName() +
+                                    " | " +
+                                    cap +
+                                    " | " +
+                                    inh +
+                                    " obyv. | " +
+                                    area + " km2\n");
+                }
+            }
+        }
     }
 
     private void addListButtonListeners() {
@@ -160,30 +190,7 @@ public class GuiAppRunner extends JFrame {
         ActionListener ListCountriesActionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                logger.info("Received request to list countries.");
-                textArea.setText("");
-                List<Country> countries = CountryManager.countries;
-                if (countries.size() == 0){
-                    logger.info("No entries found for countries in country lsit.");
-                    textArea.append("Žádné záznamy.");
-                } else {
-                    for (Country country : countries){
-                        String cap = !Objects.equals(country.getCapital(), null) ? country.getCapital() : "-";
-                        long inh = country.getInhabitants() > 0 ? country.getInhabitants() : 0;
-                        double area = country.getArea() > 0 ? country.getArea() : 0;
-
-                        textArea.append(
-                            country.getCountryId() +
-                            ".  -  " +
-                            country.getName() +
-                            " | " +
-                            cap +
-                            " | " +
-                            inh +
-                            " obyv. | " +
-                            area + " km2\n");
-                    }
-                }
+                listCountries();
             }
         };
         buttonList.addActionListener(ListCountriesActionListener);
@@ -209,11 +216,36 @@ public class GuiAppRunner extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 Country c = createNewCountry();
                 CountryManager.countries.add(c);
+                listCountries();
                 clearFields();
             }
         };
-
         buttonCreate.addActionListener(addCountryActionListener);
+    }
+
+    private void addDeleteButtonListeners() {
+        logger.info("Adding Delete button listeners.");
+        ActionListener deleteCountryActionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                deleteCountry();
+                listCountries();
+                clearFields();
+            }
+        };
+        buttonDelete.addActionListener(deleteCountryActionListener);
+    }
+
+    private void deleteCountry() {
+        String countryName = fieldCountryName.getText();
+        if (!Objects.equals(countryName, "")){
+            logger.info("Country to be deleted: " + countryName);
+            boolean countryExists = CountryManager.countryExists(countryName);
+            if (countryExists){
+                Country c = CountryManager.getCountryFromKnownName(countryName);
+                CountryManager.removeCountry(c);
+            }
+        }
     }
 
     private void addSaveButtonListener() {
@@ -310,19 +342,17 @@ public class GuiAppRunner extends JFrame {
         setVisible(true);
         String submittedName = fieldCountryName.getText();
         for (Country country : CountryManager.countries) {
-            if (Objects.equals(country.getName().toLowerCase(Locale.ROOT), submittedName.toLowerCase(Locale.ROOT))) {
-                country.setCapital(fieldCountryCapital.getText());
-                if (!Objects.equals(fieldCountryArea.getText(), "")) {
-                    country.setArea(Double.parseDouble(fieldCountryArea.getText()));
-                } else {
-                    country.setInhabitants(0);
+            if (country != null){
+                if (Objects.equals(country.getName().toLowerCase(Locale.ROOT), submittedName.toLowerCase(Locale.ROOT))) {
+                    country.setCapital(fieldCountryCapital.getText());
+                    if (!Objects.equals(fieldCountryArea.getText(), "")) {
+                        country.setArea(Double.parseDouble(fieldCountryArea.getText()));
+                    }
+                    if (!Objects.equals(fieldCountryInhabitants.getText(), "")){
+                        country.setInhabitants(Long.parseLong(fieldCountryInhabitants.getText()));
+                    }
+                    logger.info("A country with this name found and updated.");
                 }
-                if (!Objects.equals(fieldCountryInhabitants.getText(), "")){
-                    country.setInhabitants(Long.parseLong(fieldCountryInhabitants.getText()));
-                } else {
-                    country.setArea(0);
-                }
-                logger.info("A country with this name found and updated.");
             }
         }
         logger.info("A country with this name wasn't found.");
